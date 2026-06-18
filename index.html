@@ -1767,7 +1767,7 @@
                         <path
                             d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                     </svg>
-                    <input type="url" id="url-input" class="url-input" placeholder="https://example.com"
+                    <input type="text" id="url-input" class="url-input" placeholder="https://example.com"
                         autocomplete="off" spellcheck="false">
                 </div>
 
@@ -2017,11 +2017,14 @@
            GRAB IMAGES  — calls POST /extract
         =================================================== */
         async function grabImages() {
-            const input = document.getElementById('url-input').value.trim();
+            let input = document.getElementById('url-input').value.trim();
             if (!input) {
                 showToast('⚠️ Please enter a valid URL first.');
                 document.getElementById('url-input').focus();
                 return;
+            }
+            if (!input.startsWith('http://') && !input.startsWith('https://')) {
+                input = 'https://' + input;
             }
 
             // ---------- UI: start loading ----------
