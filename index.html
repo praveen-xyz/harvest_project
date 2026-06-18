@@ -1831,16 +1831,16 @@
             <div class="mode-toggle-row" id="mode-toggle-row">
                 <span class="mode-toggle-label">Mode</span>
                 <div class="mode-switch">
-                    <button class="mode-opt mode-active-local" id="mode-btn-local"
+                    <button class="mode-opt" id="mode-btn-local"
                             onclick="setDownloadMode('local')" title="Save images to the server images/ folder">
                         💾 Local
                     </button>
-                    <button class="mode-opt" id="mode-btn-hosted"
+                    <button class="mode-opt mode-active-hosted" id="mode-btn-hosted"
                             onclick="setDownloadMode('hosted')" title="Download images directly to your device">
                         ☁️ Hosted
                     </button>
                 </div>
-                <span class="mode-hint" id="mode-hint">Saves to server images/ folder</span>
+                <span class="mode-hint" id="mode-hint">Downloads to your device</span>
             </div>
             <div class="action-bar" id="action-bar">
                 <button class="action-pill pill-ghost" onclick="selectAll()">
@@ -1865,7 +1865,7 @@
                         <polyline points="7 10 12 15 17 10" />
                         <line x1="12" y1="15" x2="12" y2="3" />
                     </svg>
-                    Download All
+                    Download / ZIP
                 </button>
             </div>
         </div>
@@ -1965,7 +1965,7 @@
          *   'local'  → POST /download  → images saved to server images/ folder  (Local Mode)
          *   'hosted' → GET  /proxy or POST /hosted-zip → file(s) streamed to browser  (Hosted Mode)
          */
-        let downloadMode = 'local';
+        let downloadMode = 'hosted';
 
         /* ===================================================
            CSS spin keyframe (used in loading buttons)
@@ -2312,7 +2312,11 @@
            (both Local and Hosted mode use browser download)
         =================================================== */
         function saveSingle(idx) {
-            _hostedSaveSingle(idx);
+            if (downloadMode === 'local') {
+                _localSaveSingle(idx);
+            } else {
+                _hostedSaveSingle(idx);
+            }
         }
 
         /* --- Local: save one image to the server images/ folder --- */
@@ -2385,7 +2389,11 @@
            (both Local and Hosted mode use browser download)
         =================================================== */
         async function downloadSelected() {
-            await _hostedDownloadSelected();
+            if (downloadMode === 'local') {
+                await _localDownloadSelected();
+            } else {
+                await _hostedDownloadSelected();
+            }
         }
 
         /* --- Local: save selected (or all) images to server images/ folder --- */
