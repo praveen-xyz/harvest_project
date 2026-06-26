@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Project Harvest — Web-Based Image Grabber by WiTree Technology Solutions">
+    <title>Project Harvest — Image Grabber</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #ffffff;
+            --bg-secondary: #f5f5f7;
+            --surface: #ffffff;
+            --border: #d2d2d7;
+            --border-light: #e8e8ed;
+            --text-primary: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --text-tertiary: #86868b;
+            --accent: #0071e3;
+            --accent-hover: #0077ED;
+            --accent-light: rgba(0, 113, 227, 0.08);
+            --success: #34c759;
+            --success-bg: rgba(52, 199, 89, 0.08);
+            --error: #ff3b30;
+            --error-bg: rgba(255, 59, 48, 0.06);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --transition: 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        html { font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        body { font-family: var(--font); background: var(--bg); color: var(--text-primary); min-height: 100vh; }
+        button { font-family: inherit; cursor: pointer; border: none; background: none; }
+        input { font-family: inherit; }
+
+        /* ── Layout ── */
+        .app { max-width: 1120px; margin: 0 auto; padding: 0 32px 100px; }
+
+        /* ── Animations ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.92); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(16px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes shimmer {
+            0%   { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        @keyframes bounceCheck {
+            0%   { transform: scale(1); }
+            40%  { transform: scale(1.25); }
+            70%  { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+        @keyframes btnShine {
+            0%   { left: -75%; }
+            100% { left: 125%; }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        /* ── Nav ── */
+        .nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--border-light);
+            padding: 0 32px;
+        }
+        .nav-inner {
+            max-width: 1120px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 58px;
+        }
+        .nav-left { display: flex; align-items: center; gap: 16px; }
+        .nav-brand {
+            display: flex; align-items: center; gap: 10px; text-decoration: none;
+            transition: transform 0.2s ease;
+        }
+        .nav-brand:hover { transform: translateY(-1px); }
+        .nav-brand .brand-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: linear-gradient(135deg, #0071e3, #34aadc);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 113, 227, 0.25);
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .nav-brand:hover .brand-icon { box-shadow: 0 4px 12px rgba(0, 113, 227, 0.35); transform: scale(1.05); }
+        .nav-brand .brand-icon svg { width: 18px; height: 18px; color: #fff; }
+        .nav-brand h1 { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
+        .nav-right { display: flex; align-items: center; gap: 12px; }
+        .nav-powered {
+            font-size: 0.6rem; font-weight: 500; color: var(--text-tertiary);
+            text-transform: uppercase; letter-spacing: 0.06em;
+            line-height: 1;
+        }
+        .nav-divider { width: 1px; height: 28px; background: var(--border); opacity: 0.5; }
+        .nav-logo-link {
+            display: flex; align-items: center;
+            transition: opacity var(--transition), transform 0.2s;
+        }
+        .nav-logo-link:hover { opacity: 0.8; transform: scale(1.03); }
+        .nav-logo { height: 36px; width: auto; object-fit: contain; }
+
+        /* ── Hero / Search ── */
+        .hero { text-align: center; padding: 72px 0 48px; }
+        .hero h2 {
+            font-size: 2.5rem; font-weight: 700; letter-spacing: -0.03em;
+            color: var(--text-primary); line-height: 1.15; margin-bottom: 12px;
+            animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        .hero p {
+            font-size: 1.05rem; color: var(--text-secondary); font-weight: 400;
+            max-width: 480px; margin: 0 auto 36px; line-height: 1.5;
+            animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+        }
+
+        .search-wrapper {
+            max-width: 640px; margin: 0 auto; position: relative;
+            animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+        }
+        .search-bar {
+            display: flex; align-items: center;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 4px 4px 4px 18px;
+            transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+        }
+        .search-bar:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-light);
+            transform: translateY(-1px);
+        }
+        .search-bar .search-icon { color: var(--text-tertiary); flex-shrink: 0; width: 18px; height: 18px; margin-right: 12px; }
+        .search-bar input {
+            flex: 1; border: none; outline: none; background: transparent;
+            font-size: 0.95rem; color: var(--text-primary); padding: 12px 0;
+        }
+        .search-bar input::placeholder { color: var(--text-tertiary); }
+        .btn-scan {
+            flex-shrink: 0; padding: 10px 24px;
+            background: var(--accent); color: #fff;
+            border-radius: var(--radius-sm); font-size: 0.875rem; font-weight: 600;
+            transition: background var(--transition), transform 0.1s, box-shadow var(--transition);
+            display: flex; align-items: center; gap: 6px;
+            position: relative; overflow: hidden;
+        }
+        .btn-scan:hover { background: var(--accent-hover); box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3); }
+        .btn-scan:active { transform: scale(0.97); }
+        .btn-scan:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-scan::after {
+            content: ''; position: absolute; top: 0; width: 40%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            left: -75%;
+        }
+        .btn-scan:not(:disabled):hover::after { animation: btnShine 0.6s ease; }
+        .btn-scan .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Progress Bar ── */
+        .progress-wrap {
+            display: none; max-width: 640px; margin: 28px auto 0;
+            padding: 20px 24px; background: var(--bg-secondary);
+            border-radius: var(--radius); border: 1px solid var(--border-light);
+        }
+        .progress-wrap.visible { display: block; animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .progress-bar-track {
+            width: 100%; height: 4px; background: var(--border-light);
+            border-radius: 2px; overflow: hidden; margin-bottom: 14px;
+        }
+        .progress-bar-fill {
+            height: 100%; width: 0%; border-radius: 2px;
+            background: linear-gradient(90deg, var(--accent), #34aadc, var(--accent));
+            background-size: 200% 100%;
+            transition: width 0.4s ease;
+            animation: shimmer 2s linear infinite;
+        }
+        .progress-steps {
+            display: flex; justify-content: space-between; gap: 4px;
+        }
+        .progress-step {
+            font-size: 0.72rem; color: var(--text-tertiary); font-weight: 500;
+            display: flex; align-items: center; gap: 5px;
+            transition: color 0.3s;
+        }
+        .progress-step.active { color: var(--accent); }
+        .progress-step.done { color: var(--success); }
+        .progress-step .step-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--border); transition: background 0.3s;
+        }
+        .progress-step.active .step-dot { background: var(--accent); animation: pulse 1s infinite; }
+        .progress-step.done .step-dot { background: var(--success); }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        /* ── Source Info ── */
+        .source-info {
+            display: none; align-items: center; gap: 8px;
+            padding: 10px 16px; margin: 20px auto 0;
+            max-width: 640px; background: var(--bg-secondary); border-radius: var(--radius-sm);
+            font-size: 0.8rem; color: var(--text-secondary);
+        }
+        .source-info.visible { display: flex; animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .source-info svg { flex-shrink: 0; width: 14px; height: 14px; color: var(--success); }
+        .source-info .source-url { color: var(--text-primary); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* ── Toolbar ── */
+        .toolbar {
+            display: none; align-items: center; gap: 8px; flex-wrap: wrap;
+            padding: 16px 0; margin-top: 40px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .toolbar.visible { display: flex; animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .toolbar .stats { font-size: 0.8rem; color: var(--text-secondary); margin-right: auto; }
+        .toolbar .stats b { color: var(--text-primary); font-weight: 600; }
+        .btn-pill {
+            padding: 6px 14px; background: var(--bg-secondary); border: 1px solid var(--border-light);
+            border-radius: 20px; color: var(--text-secondary); font-size: 0.75rem; font-weight: 500;
+            transition: all var(--transition), transform 0.15s;
+        }
+        .btn-pill:hover { background: var(--border-light); color: var(--text-primary); transform: translateY(-1px); }
+        .btn-pill:active { transform: translateY(0) scale(0.97); }
+        .btn-pill.active { background: var(--text-primary); border-color: var(--text-primary); color: #fff; }
+        .btn-download {
+            padding: 7px 20px; background: var(--accent); color: #fff;
+            border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+            transition: all var(--transition), transform 0.15s; margin-left: 4px;
+            position: relative; overflow: hidden;
+        }
+        .btn-download:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3); }
+        .btn-download:active { transform: translateY(0) scale(0.97); }
+        .btn-download:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-download::after {
+            content: ''; position: absolute; top: 0; width: 40%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            left: -75%;
+        }
+        .btn-download:not(:disabled):hover::after { animation: btnShine 0.6s ease; }
+
+        /* ── Grid ── */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px; padding-top: 24px;
+        }
+        .cell {
+            background: var(--surface); border: 1.5px solid var(--border-light);
+            border-radius: var(--radius); overflow: hidden;
+            cursor: pointer; position: relative;
+            transition: border-color var(--transition), box-shadow var(--transition), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+            will-change: transform;
+        }
+        .cell:hover { border-color: var(--border); box-shadow: var(--shadow-md); transform: translateY(-4px) scale(1.01); }
+        .cell.selected { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+        .cell.selected .check-circle { animation: bounceCheck 0.35s ease; }
+
+        .cell .preview-wrap { width: 100%; aspect-ratio: 1; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .cell .preview { max-width: 100%; max-height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.4s ease; }
+        .cell .preview.loaded { opacity: 1; }
+        .cell .placeholder-img { color: var(--text-tertiary); font-size: 0.7rem; text-align: center; padding: 16px; }
+
+        .cell .frame-badge {
+            position: absolute; top: 8px; left: 8px;
+            background: rgba(0,0,0,0.55); backdrop-filter: blur(8px);
+            color: #fff; font-size: 0.6rem; font-weight: 600;
+            padding: 2px 7px; border-radius: 4px;
+        }
+        .cell .check-circle {
+            position: absolute; top: 8px; right: 8px;
+            width: 22px; height: 22px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.6); background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(4px);
+            transition: all var(--transition);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .cell.selected .check-circle {
+            background: var(--accent); border-color: var(--accent);
+        }
+        .cell.selected .check-circle::after { content: '✓'; color: #fff; font-size: 0.65rem; font-weight: 700; }
+
+        .cell .meta {
+            padding: 10px 12px; border-top: 1px solid var(--border-light);
+        }
+        .cell .fname { font-size: 0.72rem; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cell .dims { font-size: 0.65rem; color: var(--text-tertiary); margin-top: 1px; }
+        .cell .status-ok { font-size: 0.68rem; color: var(--success); font-weight: 600; margin-top: 4px; display: flex; align-items: center; gap: 3px; }
+        .cell .status-fail { font-size: 0.68rem; color: var(--error); font-weight: 500; margin-top: 4px; }
+        .cell .dl-single {
+            position: absolute; bottom: 52px; right: 8px;
+            width: 30px; height: 30px; border-radius: 50%;
+            background: rgba(0,0,0,0.55); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity var(--transition), transform 0.15s;
+            z-index: 5;
+        }
+        .cell:hover .dl-single { opacity: 1; }
+        .cell .dl-single:hover { background: var(--accent); transform: scale(1.1); }
+        .cell .dl-single svg { width: 14px; height: 14px; color: #fff; }
+
+        /* ── Empty state ── */
+        .empty-state { text-align: center; padding: 60px 20px; }
+        .empty-state .empty-icon { width: 56px; height: 56px; margin: 0 auto 16px; background: var(--bg-secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .empty-state .empty-icon svg { width: 24px; height: 24px; color: var(--text-tertiary); }
+        .empty-state h3 { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+        .empty-state p { font-size: 0.85rem; color: var(--text-tertiary); max-width: 360px; margin: 0 auto; }
+
+        /* ── Toast ── */
+        .toast-wrap { position: fixed; top: 68px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
+        .toast {
+            padding: 12px 20px; border-radius: 10px; font-size: 0.82rem; font-weight: 500;
+            box-shadow: var(--shadow-lg); animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: auto; max-width: 440px; text-align: center;
+            backdrop-filter: blur(12px);
+        }
+        .toast.success { background: rgba(52,199,89,0.12); color: #1a7d36; border: 1px solid rgba(52,199,89,0.2); }
+        .toast.error { background: rgba(255,59,48,0.08); color: #c0281f; border: 1px solid rgba(255,59,48,0.15); }
+        .toast.info { background: rgba(0,113,227,0.08); color: #0055b3; border: 1px solid rgba(0,113,227,0.12); }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .app { padding: 0 16px 80px; }
+            .nav { padding: 0 16px; }
+            .hero h2 { font-size: 1.75rem; }
+            .hero { padding: 48px 0 32px; }
+            .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+        }
+        @media (max-width: 480px) {
+            .search-bar { flex-direction: column; padding: 12px; gap: 10px; }
+            .search-bar .search-icon { display: none; }
+            .btn-scan { width: 100%; justify-content: center; }
+            .nav-powered, .nav-divider { display: none; }
+            .nav-logo { height: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Nav -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <div class="nav-left">
+                <a class="nav-brand" href="/">
+                    <span class="brand-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                    </span>
+                    <h1>Project Harvest</h1>
+                </a>
+            </div>
+            <div class="nav-right">
+                <span class="nav-powered">Powered by</span>
+                <span class="nav-divider"></span>
+                <a href="#" class="nav-logo-link" title="WiTree Technology Solutions">
+                    <img src="/witree_logo.png" alt="WiTree Technology Solutions" class="nav-logo">
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="app">
+        <!-- Hero -->
+        <section class="hero" id="heroSection">
+            <h2>Grab images from<br>any web page.</h2>
+            <p>Enter a URL, preview every image on the page, select the ones you need, and save them — all in a few clicks.</p>
+            <div class="search-wrapper">
+                <div class="search-bar">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="url" id="urlInput" placeholder="Paste any URL — e.g. en.wikipedia.org/wiki/Cat" autocomplete="off" spellcheck="false" aria-label="Target URL">
+                    <button class="btn-scan" id="scanBtn" onclick="doScan()"><span id="scanLabel">Scan Page</span></button>
+                </div>
+            </div>
+            <div class="progress-wrap" id="progressWrap">
+                <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+                <div class="progress-steps">
+                    <span class="progress-step" id="step1"><span class="step-dot"></span>Connecting</span>
+                    <span class="progress-step" id="step2"><span class="step-dot"></span>Loading Page</span>
+                    <span class="progress-step" id="step3"><span class="step-dot"></span>Scrolling</span>
+                    <span class="progress-step" id="step4"><span class="step-dot"></span>Extracting Images</span>
+                </div>
+            </div>
+            <div class="source-info" id="sourceInfo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Scanned:</span>
+                <span class="source-url" id="sourceUrl"></span>
+            </div>
+        </section>
+
+        <!-- Toolbar -->
+        <div class="toolbar" id="toolbar">
+            <div class="stats" id="statsText"><b>0</b> images found · <b>0</b> selected</div>
+            <button class="btn-pill" id="selectAllBtn" onclick="selectAll()">Select All</button>
+            <button class="btn-pill" id="clearBtn" onclick="clearSelection()">Clear</button>
+            <button class="btn-pill" id="hideSmallBtn" onclick="toggleHideSmall()">Hide Small (&lt;100px)</button>
+            <button class="btn-download" id="grabBtn" onclick="doGrab()" disabled>⬇ Download Selected</button>
+        </div>
+
+        <!-- Content -->
+        <div id="content"></div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-wrap" id="toasts"></div>
+
+<script>
+let imageData = [];
+let scannedSource = '';
+let hideSmall = false;
+let scanning = false;
+const $ = id => document.getElementById(id);
+
+function toast(msg, type = 'info') {
+    const el = document.createElement('div');
+    el.className = 'toast ' + type;
+    el.textContent = msg;
+    $('toasts').appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(() => el.remove(), 300); }, 4000);
+}
+
+let progressTimer = null;
+function showProgress() {
+    $('progressWrap').classList.add('visible');
+    $('sourceInfo').classList.remove('visible');
+    $('progressFill').style.width = '0%';
+    for (let i = 1; i <= 4; i++) $('step'+i).className = 'progress-step';
+    setStep(1, 'active');
+    // Simulate progress through the steps as the backend works
+    const steps = [
+        { delay: 800, step: 1, pct: '15%' },
+        { delay: 2500, step: 2, pct: '35%' },
+        { delay: 5000, step: 3, pct: '55%' },
+        { delay: 8000, step: 4, pct: '75%' },
+        { delay: 12000, step: 4, pct: '85%' },
+    ];
+    const timers = [];
+    steps.forEach(s => {
+        timers.push(setTimeout(() => {
+            $('progressFill').style.width = s.pct;
+            for (let i = 1; i < s.step; i++) setStep(i, 'done');
+            setStep(s.step, 'active');
+        }, s.delay));
+    });
+    progressTimer = timers;
+}
+function setStep(n, state) {
+    const el = $('step'+n);
+    if (el) el.className = 'progress-step ' + state;
+}
+function hideProgress(success) {
+    if (progressTimer) progressTimer.forEach(t => clearTimeout(t));
+    $('progressFill').style.width = '100%';
+    for (let i = 1; i <= 4; i++) setStep(i, 'done');
+    setTimeout(() => {
+        $('progressWrap').classList.remove('visible');
+    }, 600);
+}
+
+async function doScan() {
+    const url = $('urlInput').value.trim();
+    if (!url) { toast('Please enter a URL.', 'error'); return; }
+    if (scanning) return;
+    scanning = true;
+    $('scanBtn').disabled = true;
+    $('scanLabel').innerHTML = '<span class="spinner"></span> Scanning…';
+    showProgress();
+
+    try {
+        const resp = await fetch('/api/scan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+        });
+        const data = await resp.json();
+        hideProgress(resp.ok);
+        if (!resp.ok) { toast(data.error || 'Scan failed.', 'error'); return; }
+        scannedSource = data.source || url;
+        $('sourceUrl').textContent = scannedSource;
+        $('sourceInfo').classList.add('visible');
+        renderGrid(data.images);
+        if (data.count > 0) toast(`Found ${data.count} image(s).`, 'success');
+        else toast('No images found on this page.', 'info');
+    } catch (e) {
+        hideProgress(false);
+        toast('Network error — is the server running?', 'error');
+    } finally {
+        scanning = false;
+        $('scanBtn').disabled = false;
+        $('scanLabel').textContent = 'Scan Page';
+    }
+}
+
+function renderGrid(images) {
+    imageData = images.map(img => ({ ...img, selected: false, hidden: false, w: 0, h: 0, el: null }));
+    hideSmall = false;
+    $('hideSmallBtn').classList.remove('active');
+    const content = $('content');
+
+    if (!images.length) {
+        content.innerHTML = `<div class="empty-state">
+            <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
+            <h3>No images found</h3>
+            <p>We couldn't detect any images on this page. Try a different URL.</p>
+        </div>`;
+        $('toolbar').classList.remove('visible');
+        return;
+    }
+    $('toolbar').classList.add('visible');
+    content.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'grid'; grid.id = 'grid';
+    content.appendChild(grid);
+
+    imageData.forEach((img, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.onclick = () => toggleSelect(i);
+
+        const frame = document.createElement('span');
+        frame.className = 'frame-badge';
+        frame.textContent = i + 1;
+        cell.appendChild(frame);
+
+        const check = document.createElement('span');
+        check.className = 'check-circle';
+        cell.appendChild(check);
+
+        const wrap = document.createElement('div');
+        wrap.className = 'preview-wrap';
+        const preview = document.createElement('img');
+        preview.className = 'preview';
+        preview.alt = img.alt || '';
+        preview.loading = 'lazy';
+        preview.src = img.url;
+        preview.onerror = () => {
+            wrap.innerHTML = '';
+            const ph = document.createElement('div');
+            ph.className = 'placeholder-img';
+            ph.textContent = 'Preview\nunavailable';
+            wrap.appendChild(ph);
+        };
+        preview.onload = () => {
+            img.w = preview.naturalWidth;
+            img.h = preview.naturalHeight;
+            const dims = cell.querySelector('.dims');
+            if (dims) dims.textContent = img.w + ' × ' + img.h + ' px';
+        };
+        wrap.appendChild(preview);
+        cell.appendChild(wrap);
+
+        // Per-image download button
+        const dlBtn = document.createElement('button');
+        dlBtn.className = 'dl-single';
+        dlBtn.title = 'Download this image';
+        dlBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+        dlBtn.onclick = (e) => { e.stopPropagation(); downloadSingle(img.url); };
+        cell.appendChild(dlBtn);
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        const fname = document.createElement('div');
+        fname.className = 'fname';
+        fname.textContent = filenameFromUrl(img.url);
+        const dims = document.createElement('div');
+        dims.className = 'dims';
+        dims.textContent = 'Loading dimensions…';
+        meta.appendChild(fname);
+        meta.appendChild(dims);
+        cell.appendChild(meta);
+
+        img.el = cell;
+        grid.appendChild(cell);
+    });
+    updateStats();
+}
+
+function filenameFromUrl(url) {
+    try { const p = new URL(url).pathname.split('/'); return decodeURIComponent(p[p.length - 1] || 'image'); }
+    catch { return 'image'; }
+}
+
+function toggleSelect(i) {
+    imageData[i].selected = !imageData[i].selected;
+    imageData[i].el.classList.toggle('selected', imageData[i].selected);
+    updateStats();
+}
+function selectAll() {
+    imageData.forEach(img => { if (!img.hidden) { img.selected = true; img.el.classList.add('selected'); } });
+    updateStats();
+}
+function clearSelection() {
+    imageData.forEach(img => { img.selected = false; img.el.classList.remove('selected'); });
+    updateStats();
+}
+function toggleHideSmall() {
+    hideSmall = !hideSmall;
+    $('hideSmallBtn').classList.toggle('active', hideSmall);
+    imageData.forEach(img => {
+        const isSmall = img.w > 0 && img.h > 0 && img.w < 100 && img.h < 100;
+        img.hidden = hideSmall && isSmall;
+        img.el.style.display = img.hidden ? 'none' : '';
+        if (img.hidden) { img.selected = false; img.el.classList.remove('selected'); }
+    });
+    updateStats();
+}
+function updateStats() {
+    const vis = imageData.filter(i => !i.hidden).length;
+    const sel = imageData.filter(i => i.selected).length;
+    $('statsText').innerHTML = `<b>${vis}</b> image${vis !== 1 ? 's' : ''} found · <b>${sel}</b> selected`;
+    $('grabBtn').disabled = sel === 0;
+}
+
+async function doGrab() {
+    const selected = imageData.filter(i => i.selected);
+    if (!selected.length) return;
+    $('grabBtn').disabled = true;
+
+    // Single image → download directly, multiple → ZIP
+    if (selected.length === 1) {
+        $('grabBtn').textContent = '⬇ Downloading…';
+        downloadSingle(selected[0].url);
+        // Mark as downloaded
+        const meta = selected[0].el.querySelector('.meta');
+        const old = meta.querySelector('.status-ok, .status-fail');
+        if (old) old.remove();
+        const status = document.createElement('div');
+        status.className = 'status-ok';
+        status.textContent = '✓ Saved to device';
+        meta.appendChild(status);
+        toast('Image downloaded to your device!', 'success');
+        $('grabBtn').disabled = false;
+        $('grabBtn').textContent = '⬇ Download Selected';
+        return;
+    }
+
+    $('grabBtn').textContent = '⬇ Preparing ZIP…';
+
+    try {
+        const resp = await fetch('/api/download-zip', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ urls: selected.map(i => i.url), source: scannedSource })
+        });
+
+        if (!resp.ok) {
+            const errData = await resp.json().catch(() => ({}));
+            toast(errData.error || 'Download failed.', 'error');
+            return;
+        }
+
+        // Trigger browser download of the ZIP file
+        const blob = await resp.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'harvest_images.zip';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+
+        // Mark selected images as downloaded
+        selected.forEach(img => {
+            const meta = img.el.querySelector('.meta');
+            const old = meta.querySelector('.status-ok, .status-fail');
+            if (old) old.remove();
+            const status = document.createElement('div');
+            status.className = 'status-ok';
+            status.textContent = '✓ Saved to device';
+            meta.appendChild(status);
+        });
+
+        toast(`Downloaded ${selected.length} images as ZIP to your device!`, 'success');
+    } catch (e) {
+        toast('Network error during download.', 'error');
+    } finally {
+        $('grabBtn').disabled = false;
+        $('grabBtn').textContent = '⬇ Download Selected';
+    }
+}
+
+function downloadSingle(imgUrl) {
+    // Download a single image via the proxy endpoint
+    const a = document.createElement('a');
+    a.href = '/api/proxy-image?url=' + encodeURIComponent(imgUrl);
+    a.download = '';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    toast('Downloading image…', 'info');
+}
+
+$('urlInput').addEventListener('keydown', e => { if (e.key === 'Enter') doScan(); });
+</script>
+</body>
+</html>

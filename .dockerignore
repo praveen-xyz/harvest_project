@@ -1,0 +1,17 @@
+.git
+.github
+.venv
+venv
+ENV
+env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.db
+.pytest_cache/
+images/
+tests/
+test_app.py
+quick_test.py
+run.bat
