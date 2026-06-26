@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: project-harvest
+    env: docker
+    plan: free
+    envVars:
+      - key: HARVEST_DEV
+        value: "false"
+      - key: HARVEST_IMAGE_FOLDER
+        value: "images"
